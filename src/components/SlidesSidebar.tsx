@@ -3,6 +3,7 @@ import { ChevronDown, ChevronUp, Copy, Plus, Trash2 } from "lucide-react";
 import type { TLPageId } from "tldraw";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import {
 	Sidebar,
 	SidebarContent,
@@ -14,6 +15,7 @@ import {
 	SidebarMenuItem,
 	SidebarRail,
 	SidebarSeparator,
+	useSidebar,
 } from "@/components/ui/sidebar";
 import type { Slide } from "../slides/slideModel";
 
@@ -38,6 +40,8 @@ export function SlidesSidebar({
 	onRename,
 	onMove,
 }: SlidesSidebarProps) {
+	const { state } = useSidebar();
+	const isCollapsed = state === "collapsed";
 	const [editingId, setEditingId] = useState<TLPageId | null>(null);
 	const [draftTitle, setDraftTitle] = useState("");
 
@@ -66,11 +70,28 @@ export function SlidesSidebar({
 	return (
 		<Sidebar collapsible="icon">
 			<SidebarHeader>
-				<div className="flex items-center justify-between gap-2">
-					<h2 className="text-sm font-semibold tracking-tight">Slides</h2>
-					<Button size="sm" onClick={onAdd}>
+				<div
+					className={cn(
+						"flex items-center gap-2",
+						isCollapsed ? "flex-col justify-center" : "justify-between",
+					)}
+				>
+					<h2
+						className={cn(
+							"text-sm font-semibold tracking-tight",
+							isCollapsed && "sr-only",
+						)}
+					>
+						Slides
+					</h2>
+					<Button
+						size={isCollapsed ? "icon-sm" : "sm"}
+						onClick={onAdd}
+						aria-label="Add slide"
+						title="Add slide"
+					>
 						<Plus className="size-4" />
-						<span className="group-data-[collapsible=icon]:hidden">Add</span>
+						<span className={cn(isCollapsed && "sr-only")}>Add</span>
 					</Button>
 				</div>
 			</SidebarHeader>
@@ -83,6 +104,27 @@ export function SlidesSidebar({
 						{slides.map((slide, index) => {
 							const isActive = slide.id === currentSlideId;
 							const isEditing = slide.id === editingId;
+
+							if (isCollapsed) {
+								return (
+									<SidebarMenuItem key={slide.id} className="flex justify-center">
+										<Button
+											variant={isActive ? "default" : "outline"}
+											size="icon-sm"
+											onClick={() => onSelect(slide.id)}
+											aria-label={`Go to slide ${index + 1}`}
+											title={slide.title}
+											className={cn(
+												"size-8 rounded-md text-xs font-semibold",
+												isActive &&
+													"ring-2 ring-primary/40 ring-offset-1 ring-offset-background",
+											)}
+										>
+											{index + 1}
+										</Button>
+									</SidebarMenuItem>
+								);
+							}
 
 							return (
 								<SidebarMenuItem key={slide.id} className="rounded-md border bg-card p-2">
