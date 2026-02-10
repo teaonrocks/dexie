@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Editor, TLPageId } from 'tldraw'
 import { Tldraw } from 'tldraw'
 import { SlidesSidebar } from './components/SlidesSidebar'
+import { CanvasPropertiesSidebar } from './components/CanvasPropertiesSidebar'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { Separator } from '@/components/ui/separator'
 import { DEFAULT_ASPECT_RATIO, SLIDE_SIZES, type Slide } from './slides/slideModel'
@@ -13,6 +14,10 @@ import {
 	fitSlideFrame,
 	renameSlidePage,
 } from './slides/slideOps'
+
+const ENABLE_CUSTOM_PROPERTIES_SIDEBAR =
+	(import.meta as ImportMeta & { env?: Record<string, string | undefined> }).env
+		?.VITE_CUSTOM_PROPERTIES_SIDEBAR !== 'false'
 
 function App() {
 	const [editor, setEditor] = useState<Editor | null>(null)
@@ -106,6 +111,11 @@ function App() {
 		})
 	}
 
+	const tldrawComponents = useMemo(
+		() => (ENABLE_CUSTOM_PROPERTIES_SIDEBAR ? { StylePanel: null } : undefined),
+		[]
+	)
+
 	return (
 		<SidebarProvider>
 			<SlidesSidebar
@@ -125,9 +135,10 @@ function App() {
 					<span className="text-sm font-medium">Canvas</span>
 				</header>
 				<div className="relative min-h-0 flex-1">
-					<Tldraw onMount={setEditor} />
+					<Tldraw onMount={setEditor} components={tldrawComponents} />
 				</div>
 			</SidebarInset>
+			<CanvasPropertiesSidebar editor={editor} enabled={ENABLE_CUSTOM_PROPERTIES_SIDEBAR} />
 		</SidebarProvider>
 	)
 }
