@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Editor, TLPageId } from 'tldraw'
 import { Tldraw } from 'tldraw'
 import { SlidesSidebar } from './components/SlidesSidebar'
+import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
+import { Separator } from '@/components/ui/separator'
 import { DEFAULT_ASPECT_RATIO, SLIDE_SIZES, type Slide } from './slides/slideModel'
 import {
 	createSlide,
@@ -105,7 +107,7 @@ function App() {
 	}
 
 	return (
-		<div className="flex h-full w-full overflow-hidden">
+		<SidebarProvider>
 			<SlidesSidebar
 				slides={slides}
 				currentSlideId={currentSlideId}
@@ -116,10 +118,17 @@ function App() {
 				onDelete={handleDeleteSlide}
 				onMove={handleMoveSlide}
 			/>
-			<div className="relative min-w-0 flex-1">
-				<Tldraw onMount={setEditor} />
-			</div>
-		</div>
+			<SidebarInset className="min-w-0">
+				<header className="flex h-12 shrink-0 items-center gap-2 border-b px-3">
+					<SidebarTrigger />
+					<Separator orientation="vertical" className="h-4" />
+					<span className="text-sm font-medium">Canvas</span>
+				</header>
+				<div className="relative min-h-0 flex-1">
+					<Tldraw onMount={setEditor} />
+				</div>
+			</SidebarInset>
+		</SidebarProvider>
 	)
 }
 
